@@ -81,7 +81,7 @@
             right: 20px;
             width: 60px;
             height: 60px;
-            background: #007BFF;
+            background: #F39C12; /* Changed to orange color */
             color: white;
             border-radius: 50%;
             display: flex;
@@ -111,7 +111,7 @@
 
         /* Chat Header */
         .chat-header {
-            background: #007BFF;
+            background: #1A75FF; /* Changed to blue color like in the image */
             color: white;
             padding: 15px;
             font-size: 18px;
@@ -134,6 +134,7 @@
             padding: 15px;
             display: flex;
             flex-direction: column;
+            background-color: #f5f5f5; /* Light gray background */
         }
 
         /* Message Styles */
@@ -141,30 +142,143 @@
             max-width: 75%;
             padding: 10px 15px;
             margin: 5px;
-            border-radius: 10px;
+            border-radius: 20px; /* Rounder bubbles */
             word-wrap: break-word;
             position: relative;
             animation: fadeIn 0.4s ease-in;
         }
-        .user-message { background: #007BFF; color: white; align-self: flex-end; }
-        .bot-message { background: #E5E5EA; color: black; align-self: flex-start; }
+        .user-message { 
+            background: #E6F2FF; /* Light blue */
+            color: #333; 
+            align-self: flex-end; 
+            border: 1px solid #ccc;
+        }
+        .bot-message { 
+            background: white; 
+            color: #333; 
+            align-self: flex-start; 
+            border: 1px solid #ccc;
+        }
         .dark-mode .bot-message { background: #333; color: white; }
         .timestamp { font-size: 12px; color: gray; position: absolute; bottom: -15px; right: 10px; }
 
+        /* User Avatar */
+        .bot-avatar-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .bot-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: url('https://cdn-icons-png.flaticon.com/512/4712/4712039.png') center/cover;
+            margin-right: 10px;
+        }
+
+        /* Quick Reply Buttons */
+        .quick-reply-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 10px 0;
+        }
+        
+        .quick-reply-button {
+            background-color: white;
+            border: 1px solid #F39C12;
+            color: #333;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        .quick-reply-button:hover {
+            background-color: #F39C12;
+            color: white;
+        }
+
         /* Input Box */
-        .input-box { display: flex; padding: 10px; border-top: 1px solid #ddd; }
-        input { flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 16px; }
-        button { padding: 10px 15px; border: none; background: #007BFF; color: white; cursor: pointer; border-radius: 5px; }
+        .input-box { 
+            display: flex; 
+            padding: 10px; 
+            border-top: 1px solid #ddd; 
+            background-color: white;
+        }
+        
+        .input-field {
+            display: flex;
+            width: 100%;
+            border: 1px solid #ccc;
+            border-radius: 20px; /* Rounder input field */
+            overflow: hidden;
+        }
+        
+        input { 
+            flex: 1; 
+            padding: 10px 15px; 
+            border: none; 
+            font-size: 16px; 
+            outline: none;
+        }
+        
+        .send-button {
+            padding: 10px 15px;
+            background: transparent;
+            color: #1A75FF;
+            cursor: pointer;
+            border: none;
+            font-size: 20px;
+        }
 
         /* Voice Input */
-        .mic-button { background: red; width: 40px; height: 40px; color: white; font-size: 16px; display: flex; justify-content: center; align-items: center; cursor: pointer; }
+        .mic-button { 
+            background: transparent;
+            color: #F39C12;
+            font-size: 20px;
+            border: none;
+            cursor: pointer;
+            padding: 10px;
+        }
 
         /* Typing Indicator & Bot Avatar */
-        .typing-avatar-container { display: none; align-items: center; gap: 10px; margin: 10px; }
-        .bot-avatar { width: 40px; height: 40px; border-radius: 50%; background: url('https://cdn-icons-png.flaticon.com/512/4712/4712039.png') center/cover; }
-        .thought-bubble { background: #ddd; padding: 10px; border-radius: 10px; font-size: 14px; font-style: italic; }
+        .typing-avatar-container { 
+            display: none; 
+            align-items: center; 
+            gap: 10px; 
+            margin: 10px;
+        }
+        
+        .thought-bubble { 
+            background: #f1f1f1; 
+            padding: 10px; 
+            border-radius: 10px; 
+            font-size: 14px; 
+            font-style: italic;
+        }
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* Welcome Message */
+        .welcome-message {
+            background-color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .welcome-message h3 {
+            margin-top: 0;
+            color: #1A75FF;
+        }
+        
+        .welcome-message p {
+            margin-bottom: 10px;
+        }
     </style>
 </head>
 <body>
@@ -188,7 +302,9 @@
                 <span onclick="toggleChat()">✖</span>
             </div>
         </div>
-        <div class="chat-box" id="chat-box"></div>
+        <div class="chat-box" id="chat-box">
+            <!-- Initial bot message will be added here when chat opens -->
+        </div>
 
         <!-- Typing Indicator -->
         <div class="typing-avatar-container" id="typing-avatar-container">
@@ -196,10 +312,12 @@
             <div class="thought-bubble">Thinking...</div>
         </div>
 
-        <div>
-            <input type="text" id="user-input" placeholder="Ask a question..." onkeypress="handleKeyPress(event)">
-            <button onclick="sendMessage()">Send</button>
-            <button onclick="startVoiceInput()">🎤</button>
+        <div class="input-box">
+            <div class="input-field">
+                <input type="text" id="user-input" placeholder="Type a message..." onkeypress="handleKeyPress(event)">
+                <button class="send-button" onclick="sendMessage()">➤</button>
+                <button class="mic-button" onclick="startVoiceInput()">🎤</button>
+            </div>
         </div>
     </div>
 
@@ -207,8 +325,57 @@
         function toggleChat() {
             let chatContainer = document.getElementById("chat-container");
             let chatButton = document.getElementById("chatbot-button");
+            let chatBox = document.getElementById("chat-box");
+            
             chatContainer.style.display = (chatContainer.style.display === "none" || chatContainer.style.display === "") ? "flex" : "none";
             chatButton.style.display = chatContainer.style.display === "none" ? "flex" : "none";
+            
+            // Add welcome message when chat opens if it's not already there
+            if (chatContainer.style.display === "flex" && chatBox.childElementCount === 0) {
+                // Add bot avatar and welcome message
+                let avatarContainer = document.createElement("div");
+                avatarContainer.classList.add("bot-avatar-container");
+                
+                let avatar = document.createElement("div");
+                avatar.classList.add("bot-avatar");
+                avatarContainer.appendChild(avatar);
+                
+                chatBox.appendChild(avatarContainer);
+                
+                // Welcome message
+                let welcomeMessage = document.createElement("div");
+                welcomeMessage.classList.add("bot-message");
+                welcomeMessage.textContent = "Good Morning. How may I assist you today?";
+                chatBox.appendChild(welcomeMessage);
+                
+                // Quick reply options
+                let quickReplyContainer = document.createElement("div");
+                quickReplyContainer.classList.add("quick-reply-container");
+                
+                // Add quick reply buttons
+                const quickReplies = [
+                    "About VIT Bhopal University", 
+                    "Admission Enquiry", 
+                    "Academic Programs", 
+                    "Contact Details", 
+                    "Campus Tour", 
+                    "Scholarships"
+                ];
+                
+                quickReplies.forEach(reply => {
+                    let button = document.createElement("button");
+                    button.classList.add("quick-reply-button");
+                    button.textContent = reply;
+                    button.onclick = function() {
+                        document.getElementById("user-input").value = reply;
+                        sendMessage();
+                    };
+                    quickReplyContainer.appendChild(button);
+                });
+                
+                chatBox.appendChild(quickReplyContainer);
+                chatBox.scrollTop = chatBox.scrollHeight;
+            }
         }
 
         function toggleDarkMode() { document.body.classList.toggle("dark-mode"); }
