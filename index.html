@@ -4,7 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VITIQ Chatbot</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
     <script>
+       
         async function translateText(text, sourceLang, targetLang) {
             if (sourceLang === targetLang) return text; // No need to translate if both languages are the same
             try {
@@ -69,8 +72,186 @@
                 typingAvatar.style.display = "none"; // Hide typing animation
             }
         }
+
+        function showInquiryForm() {
+            let chatBox = document.getElementById("chat-box");
+            
+            // Create form container
+            let formContainer = document.createElement("div");
+            formContainer.classList.add("inquiry-form-container");
+            formContainer.id = "inquiry-form-container";
+            
+            // Form HTML with IDs for each field
+            formContainer.innerHTML = `
+                <div class="inquiry-form">
+                    <div class="form-group">
+                        <select id="program" class="form-control" required>
+                            <option value="" selected disabled>Select Program</option>
+                            <option value="btech">B.Tech</option>
+                            <option value="mtech">M.Tech</option>
+                            <option value="bba">BBA</option>
+                            <option value="mba">MBA</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" id="name" class="form-control" placeholder="Name" required>
+                    </div>
+                    <div class="form-group phone-input">
+                        <div class="country-code">
+                            <img src="https://upload.wikimedia.org/wikipedia/en/thumb/4/41/Flag_of_India.svg/1200px-Flag_of_India.svg.png" alt="India Flag" class="flag-icon">
+                            <span>+91</span>
+                        </div>
+                        <input type="tel" id="phone" class="form-control" placeholder="Phone" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="email" id="email" class="form-control" placeholder="Email" required>
+                    </div>
+                    <div class="form-group">
+                        <select id="state" class="form-control" required onchange="updateCities()">
+                            <option value="" selected disabled>Select State</option>
+                            <option value="mp">Madhya Pradesh</option>
+                            <option value="mh">Maharashtra</option>
+                            <option value="dl">Delhi</option>
+                            <option value="gj">Gujarat</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <select id="city" class="form-control" required>
+                            <option value="" selected disabled>Select City</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <input type="date" id="dob" class="form-control" required>
+                    </div>
+                    <div class="form-actions">
+                        <button class="btn btn-reset" onclick="resetForm()">Reset</button>
+                        <button class="btn btn-submit" onclick="submitForm()">Submit</button>
+                    </div>
+                </div>
+            `;
+            
+            chatBox.appendChild(formContainer);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        // Function to update cities based on selected state
+        function updateCities() {
+            const stateSelect = document.getElementById('state');
+            const citySelect = document.getElementById('city');
+            
+            // Clear current options
+            citySelect.innerHTML = '<option value="" selected disabled>Select City</option>';
+            
+            // Add cities based on selected state
+            const state = stateSelect.value;
+            let cities = [];
+            
+            switch(state) {
+                case 'mp':
+                    cities = ['Bhopal', 'Indore', 'Jabalpur', 'Gwalior'];
+                    break;
+                case 'mh':
+                    cities = ['Mumbai', 'Pune', 'Nagpur', 'Nashik'];
+                    break;
+                case 'dl':
+                    cities = ['New Delhi', 'North Delhi', 'South Delhi', 'East Delhi'];
+                    break;
+                case 'gj':
+                    cities = ['Ahmedabad', 'Surat', 'Vadodara', 'Rajkot'];
+                    break;
+                default:
+                    cities = [];
+            }
+            
+            // Add new city options
+            cities.forEach(city => {
+                const option = document.createElement('option');
+                option.value = city.toLowerCase().replace(' ', '_');
+                option.textContent = city;
+                citySelect.appendChild(option);
+            });
+        }
+
+        function resetForm() {
+            const form = document.querySelector('.inquiry-form');
+            const inputs = form.querySelectorAll('input, select');
+            inputs.forEach(input => {
+                input.value = '';
+            });
+            
+            // Reset city dropdown to initial state
+            const citySelect = document.getElementById('city');
+            citySelect.innerHTML = '<option value="" selected disabled>Select City</option>';
+        }
+
+        async function submitForm() {
+            // Get form values
+            const program = document.getElementById('program').value;
+            const name = document.getElementById('name').value;
+            const phone = document.getElementById('phone').value;
+            const email = document.getElementById('email').value;
+            const state = document.getElementById('state').value;
+            const city = document.getElementById('city').value;
+            const dob = document.getElementById('dob').value;
+            
+            // Basic validation
+            if (!program || !name || !phone || !email || !state || !city || !dob) {
+                alert('Please fill in all required fields');
+                return;
+            }
+            
+            // Create the data object to send
+            const formData = {
+                program,
+                name,
+                phone: `+91${phone}`,
+                email,
+                state,
+                city,
+                dob,
+                submissionDate: new Date().toISOString()
+            };
+            
+            try {
+                // Send data to server
+                const response = await fetch('http://localhost:3000/api/inquiries', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    // Show success message in chat
+                    let chatBox = document.getElementById("chat-box");
+                    
+                    // Remove the form
+                    let formContainer = document.getElementById('inquiry-form-container');
+                    if (formContainer) {
+                        formContainer.remove();
+                    }
+                    
+                    // Add success message
+                    let successMessage = document.createElement("div");
+                    successMessage.classList.add("bot-message");
+                    successMessage.textContent = "Thank you for your inquiry! Your information has been saved. We will contact you shortly.";
+                    chatBox.appendChild(successMessage);
+                    chatBox.scrollTop = chatBox.scrollHeight;
+                } else {
+                    // Show error message
+                    alert(`Error: ${result.message || 'Failed to submit form'}`);
+                }
+            } catch (error) {
+                console.error('Error submitting form:', error);
+                alert('Could not connect to the server. Please try again later.');
+            }
+        }
     </script>    
     <style>
+        /* Existing styles remain the same */
         body { font-family: Arial, sans-serif; margin: 0; padding: 0; transition: background 0.3s, color 0.3s; }
         .dark-mode { background-color: #121212; color: white; }
 
@@ -92,7 +273,7 @@
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             transition: transform 0.3s ease;
         }
-        .chatbot-button:hover { transform: scale(1.1); }
+        .chatbot-button:hover { transform: scale(0.6); }
 
         /* Chat Container */
         .chat-container {
@@ -111,7 +292,7 @@
 
         /* Chat Header */
         .chat-header {
-            background: #1A75FF; /* Changed to blue color like in the image */
+            background: #F39C12; 
             color: white;
             padding: 15px;
             font-size: 18px;
@@ -120,12 +301,21 @@
             align-items: center;
         }
 
-        /* Close Button */
-        .close-chat { cursor: pointer; font-size: 18px; }
 
         /* Language Selection & Dark Mode */
-        .controls { display: flex; gap: 10px; align-items: center; }
-        .language-select, .toggle-dark { padding: 5px; font-size: 14px; border-radius: 5px; cursor: pointer; }
+        .controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .language-select, .toggle-dark {
+            padding: 5px;
+            font-size: 14px;
+            border-radius: 10px;
+            cursor: pointer;
+            border: 1px solid #ccc;
+        }
 
         /* Chat Box */
         .chat-box {
@@ -159,7 +349,7 @@
             align-self: flex-start; 
             border: 1px solid #ccc;
         }
-        .dark-mode .bot-message { background: #333; color: white; }
+        .dark-mode .bot-message { background: #333; color: rgb(255, 255, 255); }
         .timestamp { font-size: 12px; color: gray; position: absolute; bottom: -15px; right: 10px; }
 
         /* User Avatar */
@@ -228,7 +418,7 @@
         .send-button {
             padding: 10px 15px;
             background: transparent;
-            color: #1A75FF;
+            color:#F39C12;
             cursor: pointer;
             border: none;
             font-size: 20px;
@@ -279,17 +469,114 @@
         .welcome-message p {
             margin-bottom: 10px;
         }
+
+        /* Inquiry Form Styles */
+        .inquiry-form-container {
+            width: 100%;
+            align-self: center;
+            margin: 10px 0;
+            animation: fadeIn 0.4s ease-in;
+        }
+
+        .inquiry-form {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .dark-mode .inquiry-form {
+            background: #333;
+            border-color: #555;
+        }
+
+        .form-group {
+            margin-bottom: 12px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+
+        .form-control.error {
+            border-color: #ff3860;
+        }
+
+        .error-message {
+            color: #ff3860;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        .phone-input {
+            display: flex;
+            align-items: center;
+        }
+
+        .country-code {
+            display: flex;
+            align-items: center;
+            padding: 0 10px;
+            background: #f5f5f5;
+            border: 1px solid #ccc;
+            border-radius: 5px 0 0 5px;
+            height: 38px;
+        }
+
+        .phone-input .form-control {
+            border-radius: 0 5px 5px 0;
+        }
+
+        .flag-icon {
+            width: 20px;
+            height: 15px;
+            margin-right: 5px;
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            border: none;
+            transition: all 0.3s;
+        }
+
+        .btn-reset {
+            background: #f1f1f1;
+            color: #333;
+        }
+
+        .btn-submit {
+            background: #007BFF;
+            color: white;
+        }
     </style>
 </head>
 <body>
 
     <!-- Floating Chatbot Button -->
-    <div class="chatbot-button" id="chatbot-button" onclick="toggleChat()">💬</div>
+    <div class="chatbot-button" id="chatbot-button" onclick="toggleChat()">
+        <i class="fas fa-comment-dots"></i>
+    </div>
+
 
     <!-- Expandable Chat Box -->
     <div class="chat-container" id="chat-container">
         <div class="chat-header">
-            VITQ Chatbot 🤖
+            VITQ Chatbot
             <div class="controls">
                 <select id="language-select">
                     <option value="en">English</option>
@@ -299,7 +586,7 @@
                     <option value="de">German</option>
                 </select>
                 <button onclick="toggleDarkMode()">🌙</button>
-                <span onclick="toggleChat()">✖</span>
+                <button style="font-size:16px"><a href="https://www.google.com/maps/place/VIT+Bhopal+University/@23.0774764,76.8487122,17z/data=!3m1!4b1!4m6!3m5!1s0x397ce9ceaaaaaaab:0xa224b6b82b421f83!8m2!3d23.0774715!4d76.8512871!16s%2Fg%2F11hbgkdndx?entry=ttu&g_ep=EgoyMDI1MDQxNi4xIKXMDSoJLDEwMjExNDU1SAFQAw%3D%3D"><i class="fa fa-plane"></i></a></button>
             </div>
         </div>
         <div class="chat-box" id="chat-box">
@@ -308,7 +595,6 @@
 
         <!-- Typing Indicator -->
         <div class="typing-avatar-container" id="typing-avatar-container">
-            <div class="bot-avatar"></div>
             <div class="thought-bubble">Thinking...</div>
         </div>
 
@@ -322,57 +608,96 @@
     </div>
 
     <script>
-        function toggleChat() {
+       function toggleChat() {
             let chatContainer = document.getElementById("chat-container");
             let chatButton = document.getElementById("chatbot-button");
+            let chatIcon = chatButton.querySelector("i");
             let chatBox = document.getElementById("chat-box");
-            
-            chatContainer.style.display = (chatContainer.style.display === "none" || chatContainer.style.display === "") ? "flex" : "none";
-            chatButton.style.display = chatContainer.style.display === "none" ? "flex" : "none";
-            
-            // Add welcome message when chat opens if it's not already there
-            if (chatContainer.style.display === "flex" && chatBox.childElementCount === 0) {
-                // Add bot avatar and welcome message
+
+            const isChatOpen = chatContainer.style.display === "flex";
+
+            // Toggle chat container
+            chatContainer.style.display = isChatOpen ? "none" : "flex";
+
+            // Toggle icon using Font Awesome classes
+            if (isChatOpen) {
+                chatIcon.classList.remove("fa-times");
+                chatIcon.classList.add("fa-comment-dots");
+            } else {
+                chatIcon.classList.remove("fa-comment-dots");
+                chatIcon.classList.add("fa-times");
+            }
+
+            // Add welcome message only when chat opens and it's empty
+            if (!isChatOpen && chatBox.childElementCount === 0) {
                 let avatarContainer = document.createElement("div");
                 avatarContainer.classList.add("bot-avatar-container");
-                
+
                 let avatar = document.createElement("div");
                 avatar.classList.add("bot-avatar");
                 avatarContainer.appendChild(avatar);
-                
+
                 chatBox.appendChild(avatarContainer);
-                
-                // Welcome message
+
                 let welcomeMessage = document.createElement("div");
                 welcomeMessage.classList.add("bot-message");
                 welcomeMessage.textContent = "Good Morning. How may I assist you today?";
                 chatBox.appendChild(welcomeMessage);
-                
-                // Quick reply options
+
                 let quickReplyContainer = document.createElement("div");
                 quickReplyContainer.classList.add("quick-reply-container");
-                
-                // Add quick reply buttons
+
                 const quickReplies = [
-                    "About VIT Bhopal University", 
-                    "Admission Enquiry", 
-                    "Academic Programs", 
-                    "Contact Details", 
-                    "Campus Tour", 
+                    "About VIT Bhopal University",
+                    "Admission Enquiry",
+                    "Academic Programs",
+                    "Contact Details",
+                    "Campus Tour",
                     "Scholarships"
                 ];
-                
+
                 quickReplies.forEach(reply => {
                     let button = document.createElement("button");
                     button.classList.add("quick-reply-button");
                     button.textContent = reply;
-                    button.onclick = function() {
-                        document.getElementById("user-input").value = reply;
-                        sendMessage();
+                    button.onclick = function () {
+                        if (reply === "Admission Enquiry") {
+                            document.getElementById("user-input").value = reply;
+                            sendMessage();
+                            setTimeout(() => {
+                                // Show inquiry form after sending the message
+                                let inquiryMessage = document.createElement("div");
+                                inquiryMessage.classList.add("bot-message");
+                                inquiryMessage.textContent = "Please fill the inquiry form by clicking on the button below.";
+                                chatBox.appendChild(inquiryMessage);
+                                
+                                let inquiryButtonContainer = document.createElement("div");
+                                inquiryButtonContainer.style.display = "flex";
+                                inquiryButtonContainer.style.justifyContent = "flex-start";
+                                inquiryButtonContainer.style.margin = "10px 0";
+                                
+                                let inquiryButton = document.createElement("button");
+                                inquiryButton.textContent = "Click here to inquire";
+                                inquiryButton.style.padding = "8px 15px";
+                                inquiryButton.style.backgroundColor = "#F39C12";
+                                inquiryButton.style.color = "white";
+                                inquiryButton.style.border = "none";
+                                inquiryButton.style.borderRadius = "20px";
+                                inquiryButton.style.cursor = "pointer";
+                                inquiryButton.onclick = showInquiryForm;
+                                
+                                inquiryButtonContainer.appendChild(inquiryButton);
+                                chatBox.appendChild(inquiryButtonContainer);
+                                chatBox.scrollTop = chatBox.scrollHeight;
+                            }, 1000);
+                        } else {
+                            document.getElementById("user-input").value = reply;
+                            sendMessage();
+                        }
                     };
                     quickReplyContainer.appendChild(button);
                 });
-                
+
                 chatBox.appendChild(quickReplyContainer);
                 chatBox.scrollTop = chatBox.scrollHeight;
             }
@@ -383,13 +708,17 @@
         function handleKeyPress(event) { if (event.key === "Enter") sendMessage(); }
 
         function startVoiceInput() {
-            let recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-            recognition.lang = "en-US";
-            recognition.start();
-            recognition.onresult = function(event) {
-                document.getElementById("user-input").value = event.results[0][0].transcript;
-                sendMessage();
-            };
+            if (window.SpeechRecognition || window.webkitSpeechRecognition) {
+                let recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+                recognition.lang = "en-US";
+                recognition.start();
+                recognition.onresult = function(event) {
+                    document.getElementById("user-input").value = event.results[0][0].transcript;
+                    sendMessage();
+                };
+            } else {
+                alert("Speech recognition is not supported in your browser. Please try Chrome or Edge.");
+            }
         }
     </script>
 

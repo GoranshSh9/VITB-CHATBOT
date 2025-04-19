@@ -33,7 +33,7 @@ def get_answer(user_query):
     best_match, score = process.extractOne(user_query, questions)
     
 
-    if score > 75:                                          # If the match is good (above 70% similarity), return the answer
+    if score > 80:                                          # If the match is good (above 70% similarity), return the answer
         for faq in faq_data["VIT_Bhopal_FAQ"]:
             if faq["question"] == best_match:
                 return faq["answer"]                        # If no good match, fall back to Llama model
