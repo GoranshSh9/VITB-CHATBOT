@@ -1,6 +1,6 @@
-# 🤖 VITIQ - AI-Powered Chatbot for VIT Bhopal University
+# 🤖 VITB Chatbot - AI-Powered Chatbot for VIT Bhopal University
 
-VITIQ is an intelligent FAQ chatbot designed to assist students, aspirants, and parents with accurate, fast, and multilingual information about VIT Bhopal University. Powered by LLaMA2 for advanced NLP capabilities and enhanced with fuzzy matching, VITIQ responds to queries using a local knowledge base and can also fetch responses from a language model when necessary.
+VITB Chatbot is an intelligent FAQ chatbot designed to assist students, aspirants, and parents with accurate, fast, and multilingual information about VIT Bhopal University. Powered by LLaMA2 for advanced NLP capabilities and enhanced with fuzzy matching, VITIQ responds to queries using a local knowledge base and can also fetch responses from a language model when necessary.
 
 ---
 
